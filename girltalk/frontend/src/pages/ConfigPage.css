@@ -1,0 +1,228 @@
+.config-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 16px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 24px;
+  color: white;
+}
+
+.back-btn {
+  color: white !important;
+  margin-right: 16px;
+}
+
+.page-title {
+  color: white !important;
+  margin: 0 !important;
+  font-size: 1.5rem !important;
+  font-weight: bold;
+}
+
+.config-title {
+  color: #333 !important;
+  font-size: 1.25rem !important;
+  margin: 0 !important;
+  font-weight: bold;
+}
+
+/* 配置标签页 */
+.config-tabs {
+  --adm-color-primary: #ff6b6b;
+}
+
+.config-tabs .adm-tabs-header {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  backdrop-filter: blur(10px);
+  margin-bottom: 16px;
+}
+
+.config-tabs .adm-tabs-tab {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.config-tabs .adm-tabs-tab-active {
+  color: white;
+}
+
+.config-tabs .adm-tabs-tab-line {
+  background: #ff6b6b;
+}
+
+/* 配置卡片 */
+.config-card {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-radius: 16px !important;
+  padding: 24px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
+  margin-bottom: 16px;
+}
+
+.config-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.config-header .adm-typography {
+  margin: 0 !important;
+}
+
+.download-btn,
+.save-btn {
+  border-radius: 8px !important;
+}
+
+.save-btn {
+  background: #52c41a !important;
+  border-color: #52c41a !important;
+}
+
+/* 配置文本区域 */
+.config-textarea {
+  width: 100%;
+  border-radius: 12px;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 14px;
+  line-height: 1.5;
+  padding: 12px;
+  border: 1px solid #d9d9d9;
+  resize: vertical;
+  font-family: inherit;
+}
+
+.config-textarea:focus {
+  outline: none;
+  border-color: #1890ff;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+}
+
+/* 配置提示 */
+.config-tips {
+  margin-top: 16px;
+  padding: 12px;
+  background: #e6f7ff;
+  border-radius: 8px;
+  border-left: 4px solid #1890ff;
+}
+
+.tip-text {
+  color: #1890ff !important;
+  font-size: 14px !important;
+}
+
+/* 上传区域 */
+.upload-section {
+  margin-bottom: 24px;
+}
+
+.section-title {
+  display: block !important;
+  font-weight: bold !important;
+  color: #333 !important;
+  margin-bottom: 16px !important;
+  font-size: 1.1rem !important;
+}
+
+.upload-area {
+  margin-bottom: 12px;
+  position: relative;
+}
+
+.file-input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.upload-btn {
+  border-radius: 8px !important;
+}
+
+.upload-tip {
+  display: block !important;
+  color: #666 !important;
+  font-size: 12px !important;
+  line-height: 1.5;
+}
+
+/* 知识库列表 */
+.knowledge-list {
+  margin-top: 24px;
+}
+
+.knowledge-item {
+  padding: 16px !important;
+  border-radius: 8px !important;
+  margin-bottom: 8px !important;
+  background: #f8f9fa !important;
+}
+
+.knowledge-info {
+  width: 100%;
+}
+
+.knowledge-name {
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.knowledge-details {
+  color: #666;
+}
+
+.detail-text {
+  color: #666 !important;
+  font-size: 12px !important;
+}
+
+/* 空状态 */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #999;
+}
+
+.empty-text {
+  color: #999 !important;
+  font-size: 16px !important;
+}
+
+/* 加载遮罩 */
+.loading-overlay {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  background: rgba(0, 0, 0, 0.5) !important;
+  z-index: 9999 !important;
+}
+
+/* 移动端优化 */
+@media (max-width: 480px) {
+  .config-page {
+    padding: 12px;
+  }
+  
+  .config-card {
+    padding: 20px !important;
+  }
+  
+  .config-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .config-textarea {
+    font-size: 12px;
+  }
+}

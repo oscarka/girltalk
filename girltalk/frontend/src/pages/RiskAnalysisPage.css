@@ -1,0 +1,821 @@
+.risk-analysis-page {
+  min-height: 100vh;
+  width: 100%;
+  max-width: 100%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 24px;
+  color: white;
+}
+
+.back-btn {
+  color: white !important;
+  margin-right: 16px;
+}
+
+.page-title {
+  color: white !important;
+  margin: 0 !important;
+  font-size: 1.5rem !important;
+  font-weight: bold;
+}
+
+.card-title {
+  color: #333 !important;
+  font-size: 1.25rem !important;
+  margin-bottom: 16px !important;
+  font-weight: bold;
+}
+
+/* 步骤指示器 */
+.step-indicator {
+  display: flex;
+  justify-content: space-between;
+  margin: 24px 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 20px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  position: relative;
+  z-index: 10;
+  width: calc(100% - 32px);
+  box-sizing: border-box;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  opacity: 0.6;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  cursor: pointer;
+}
+
+.step:hover {
+  opacity: 0.8;
+  transform: translateY(-2px);
+}
+
+.step.active {
+  opacity: 1;
+}
+
+.step-number {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  margin-bottom: 10px;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 14px;
+}
+
+.step.active .step-number {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 100%);
+  box-shadow: 0 4px 16px rgba(255, 107, 107, 0.4);
+  transform: scale(1.1);
+}
+
+.step-text {
+  font-size: 13px;
+  color: white;
+  text-align: center;
+  font-weight: 500;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* 步骤切换加载动画覆盖层 */
+.step-loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeIn 0.3s ease-out;
+  backdrop-filter: blur(5px);
+}
+
+/* 步骤切换加载动画 */
+.step-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 40px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 20px;
+  color: white;
+  box-shadow: 0 20px 60px rgba(102, 126, 234, 0.6);
+  animation: fadeInUp 0.6s ease-out;
+  min-width: 320px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.loading-spinner {
+  width: 60px;
+  height: 60px;
+  border: 5px solid rgba(255, 255, 255, 0.3);
+  border-top: 5px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+  /* 确保动画优先级 */
+  animation: spin 1s linear infinite !important;
+}
+
+.loading-text {
+  font-size: 18px;
+  font-weight: 600;
+  text-align: center;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* 全局旋转动画，确保内联样式也能使用 */
+@keyframes globalSpin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* 确保所有内容都是全宽 */
+.step-content {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* 确保卡片内容不会溢出 */
+.card-content {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 步骤内容 */
+.step-content {
+  margin-bottom: 24px;
+  animation: slideInUp 0.5s ease-out;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.input-card,
+.result-card,
+.tactics-card,
+.final-result-card {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-radius: 16px !important;
+  padding: 24px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.input-textarea {
+  width: 100%;
+  margin: 16px 0;
+  padding: 12px;
+  border: 1px solid #d9d9d9;
+  border-radius: 12px;
+  font-size: 14px;
+  line-height: 1.5;
+  resize: vertical;
+  font-family: inherit;
+}
+
+.input-textarea:focus {
+  outline: none;
+  border-color: #1890ff;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+}
+
+.examples {
+  margin: 16px 0;
+}
+
+.examples-title {
+  display: block !important;
+  margin-bottom: 12px !important;
+  color: #666 !important;
+  font-weight: bold;
+}
+
+.example-tag {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.example-tag:hover {
+  transform: scale(1.05);
+}
+
+.action-btn {
+  margin-top: 24px !important;
+  height: 56px !important;
+  border-radius: 28px !important;
+  font-weight: 600 !important;
+}
+
+/* 风险评分 */
+.risk-score {
+  display: flex;
+  align-items: center;
+  margin: 24px 0;
+}
+
+.score-circle {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  margin-right: 20px;
+}
+
+.score-circle.large {
+  width: 120px;
+  height: 120px;
+}
+
+.score-circle-inner {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: conic-gradient(#52c41a 0deg, #f0f0f0 0deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.score-circle-inner.large {
+  background: conic-gradient(#52c41a 0deg, #f0f0f0 0deg);
+}
+
+.score-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+}
+
+.score-text.large {
+  font-size: 24px;
+}
+
+.score-info {
+  flex: 1;
+}
+
+.risk-level {
+  font-size: 20px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.risk-level.large {
+  font-size: 28px;
+}
+
+.rules-count {
+  color: #666;
+  font-size: 14px;
+}
+
+.decision {
+  font-size: 16px;
+  color: #666;
+  margin-top: 8px;
+}
+
+/* 分割线 */
+.divider {
+  text-align: center;
+  margin: 32px 0;
+  position: relative;
+  color: #333;
+  font-size: 16px;
+  font-weight: 600;
+  background: white;
+  padding: 0 20px;
+  position: relative;
+  z-index: 2;
+}
+
+.divider::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #e8e8e8 0%, #1890ff 50%, #e8e8e8 100%);
+  z-index: 1;
+}
+
+/* 规则项 */
+.rule-item {
+  display: flex;
+  flex-direction: column;
+  margin: 16px 0;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  border-left: 4px solid #d9d9d9;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.rule-keywords {
+  flex: 1;
+  margin: 0 12px !important;
+  color: #666 !important;
+}
+
+.rule-score {
+  color: #ff4d4f !important;
+  font-weight: bold !important;
+}
+
+/* 话术项 */
+.tactic-item {
+  margin: 16px 0;
+  padding: 20px;
+  background: #f0f8ff;
+  border-radius: 12px;
+  border-left: 4px solid #1890ff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.tactic-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tactic-rule {
+  font-weight: bold;
+  color: #1890ff;
+  margin-bottom: 8px;
+  font-size: 15px;
+  background: #e6f7ff;
+  padding: 6px 12px;
+  border-radius: 6px;
+}
+
+.tactic-priority {
+  font-size: 12px;
+  color: #52c41a;
+  background: #f6ffed;
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid #b7eb8f;
+}
+
+.tactic-text {
+  color: #333;
+  line-height: 1.6;
+  font-size: 14px;
+  margin-bottom: 12px;
+  padding: 12px;
+  background: white;
+  border-radius: 8px;
+  border-left: 3px solid #1890ff;
+}
+
+.tactic-knowledge {
+  margin-top: 12px;
+  padding: 8px 12px;
+  background: #f0f8ff;
+  border-radius: 6px;
+  border-left: 3px solid #91d5ff;
+}
+
+.knowledge-label {
+  color: #1890ff;
+  font-weight: 600;
+  margin-right: 8px;
+  font-size: 13px;
+}
+
+.knowledge-text {
+  color: #555;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+/* 评分详情 */
+.score-details {
+  margin: 20px 0;
+}
+
+.score-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 16px 0;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 10px;
+  border-left: 4px solid #1890ff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  font-size: 14px;
+}
+
+.score-item span:first-child {
+  color: #333;
+  font-weight: 500;
+}
+
+.score-value {
+  font-weight: bold !important;
+  color: #1890ff !important;
+  font-size: 16px;
+  background: #e6f7ff;
+  padding: 6px 12px;
+  border-radius: 6px;
+}
+
+/* 证据链 */
+.evidence-chain {
+  margin: 20px 0;
+}
+
+.evidence-item {
+  display: flex;
+  align-items: flex-start;
+  margin: 16px 0;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 10px;
+  border-left: 4px solid #1890ff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.evidence-number {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #1890ff;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: bold;
+  margin-right: 16px;
+  flex-shrink: 0;
+}
+
+.evidence-text {
+  flex: 1;
+  color: #333;
+  line-height: 1.6;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* 加载遮罩 */
+.loading-overlay {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  background: rgba(0, 0, 0, 0.5) !important;
+  z-index: 9999 !important;
+}
+
+/* 移动端优化 */
+@media (max-width: 480px) {
+  .risk-analysis-page {
+    padding: 12px;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .step-indicator {
+    padding: 12px;
+    width: calc(100% - 24px);
+  }
+
+  .step-text {
+    font-size: 10px;
+  }
+
+  .input-card,
+  .result-card,
+  .tactics-card,
+  .final-result-card {
+    padding: 20px !important;
+    width: 100% !important;
+  }
+
+  .score-circle {
+    width: 60px;
+    height: 60px;
+  }
+
+  .score-circle.large {
+    width: 100px;
+    height: 100px;
+  }
+}
+
+/* AI分析结果 */
+.ai-analysis {
+  margin: 16px 0;
+  padding: 20px;
+  background: #fff7e6;
+  border-radius: 12px;
+  border-left: 4px solid #fa8c16;
+}
+
+.ai-title {
+  display: block !important;
+  font-weight: bold !important;
+  color: #d46b08 !important;
+  margin-bottom: 12px !important;
+  font-size: 15px;
+}
+
+.ai-risk-reasons {
+  margin-bottom: 20px;
+}
+
+.ai-tags-container {
+  margin-top: 8px;
+}
+
+.ai-tag {
+  margin: 4px 4px 4px 0;
+  padding: 6px 10px;
+  font-size: 13px;
+  border-radius: 6px;
+}
+
+.ai-suggestions {
+  margin-top: 20px;
+}
+
+.suggestions-list {
+  margin-top: 12px;
+}
+
+.suggestion-item {
+  display: flex;
+  align-items: flex-start;
+  margin: 12px 0;
+  padding: 12px;
+  background: white;
+  border-radius: 8px;
+  border-left: 4px solid #fa8c16;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.suggestion-number {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #fa8c16;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
+.suggestion-text {
+  flex: 1;
+  color: #333;
+  line-height: 1.6;
+  font-size: 14px;
+}
+
+/* 规则项样式更新 */
+.rules-container {
+  margin-top: 16px;
+}
+
+.rule-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.rule-method-tag {
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.rule-name {
+  flex: 1;
+  margin: 0 12px;
+  font-weight: bold;
+  color: #333;
+  font-size: 15px;
+  min-width: 120px;
+}
+
+.rule-score {
+  color: #ff4d4f !important;
+  font-weight: bold !important;
+  font-size: 14px;
+  background: #fff1f0;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.rule-description {
+  margin: 12px 0;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  color: #555;
+  font-size: 14px;
+  line-height: 1.5;
+  border-left: 3px solid #d9d9d9;
+}
+
+.rule-keywords {
+  margin-top: 12px;
+  padding: 8px 12px;
+  background: #e6f7ff;
+  border-radius: 6px;
+  border-left: 3px solid #1890ff;
+}
+
+.keywords-label {
+  color: #1890ff;
+  font-weight: 600;
+  margin-right: 8px;
+  font-size: 13px;
+}
+
+.keywords-text {
+  color: #333;
+  font-size: 13px;
+}
+
+/* 验证话术样式 */
+.verification-tactics {
+  margin-top: 16px;
+}
+
+.verification-tactics .tactic-item {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+  border-left: 4px solid #1890ff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.tactic-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tactic-rule {
+  font-weight: bold;
+  color: #1890ff;
+  font-size: 15px;
+  background: #e6f7ff;
+  padding: 6px 12px;
+  border-radius: 6px;
+}
+
+.tactic-priority {
+  font-size: 12px;
+  color: #52c41a;
+  background: #f6ffed;
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid #b7eb8f;
+}
+
+.tactic-text {
+  color: #333;
+  line-height: 1.6;
+  font-size: 14px;
+  margin-bottom: 12px;
+  padding: 12px;
+  background: white;
+  border-radius: 8px;
+  border-left: 3px solid #1890ff;
+}
+
+.tactic-knowledge {
+  margin-top: 12px;
+  padding: 8px 12px;
+  background: #f0f8ff;
+  border-radius: 6px;
+  border-left: 3px solid #91d5ff;
+}
+
+.knowledge-label {
+  color: #1890ff;
+  font-weight: 600;
+  margin-right: 8px;
+  font-size: 13px;
+}
+
+.knowledge-text {
+  color: #555;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.verification-tactics .tactic-rule {
+  font-weight: 600;
+  color: #1890ff;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.verification-tactics .tactic-text {
+  color: #333;
+  line-height: 1.5;
+  font-size: 14px;
+}

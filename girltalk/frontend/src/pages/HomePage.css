@@ -1,0 +1,100 @@
+.home-page {
+  min-height: 100vh;
+  padding: 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 40px;
+  padding-top: 40px;
+}
+
+.main-title {
+  color: white !important;
+  font-size: 2.5rem !important;
+  margin-bottom: 16px !important;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  font-weight: bold;
+}
+
+.subtitle {
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-size: 1.1rem !important;
+  margin-bottom: 0 !important;
+}
+
+.features {
+  margin-bottom: 40px;
+}
+
+.feature-card {
+  background: rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 16px !important;
+  margin-bottom: 20px !important;
+  padding: 24px !important;
+  text-align: center;
+}
+
+.feature-icon {
+  font-size: 3rem;
+  color: #ffd700;
+  margin-bottom: 16px;
+}
+
+.feature-title {
+  color: white !important;
+  font-size: 1.25rem !important;
+  margin-bottom: 12px !important;
+  font-weight: bold;
+}
+
+.feature-desc {
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-size: 1rem !important;
+  margin: 0 !important;
+}
+
+.actions {
+  margin-bottom: 40px;
+}
+
+.action-btn {
+  height: 56px !important;
+  font-size: 1.1rem !important;
+  border-radius: 28px !important;
+  font-weight: 600 !important;
+}
+
+.action-btn:first-child {
+  background: linear-gradient(45deg, #ff6b6b, #ee5a24) !important;
+  border: none !important;
+}
+
+.footer {
+  text-align: center;
+  padding-top: 20px;
+}
+
+.version {
+  color: rgba(255, 255, 255, 0.7) !important;
+  font-size: 0.9rem !important;
+}
+
+/* 移动端优化 */
+@media (max-width: 480px) {
+  .home-page {
+    padding: 16px;
+  }
+  
+  .main-title {
+    font-size: 2rem !important;
+  }
+  
+  .feature-card {
+    padding: 20px !important;
+  }
+}
