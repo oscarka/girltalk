@@ -1,14 +1,7 @@
 [build]
 builder = "dockerfile"
-dockerfilePath = "backend/Dockerfile"
-watchPaths = ["."]
 
 [deploy]
-startCommand = "uvicorn app.main:app --host 0.0.0.0 --port $PORT --workers 1"
+startCommand = "uvicorn app.main:app --host 0.0.0.0 --port $PORT"
 healthcheckPath = "/health"
 healthcheckTimeout = 300
-restartPolicyType = "on_failure"
-restartPolicyMaxRetries = 5
-
-[deploy.variables]
-ENVIRONMENT = "production"

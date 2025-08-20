@@ -1,21 +1,18 @@
-# 使用更轻量的Python镜像
+# 使用稳定的 Python 镜像
 FROM python:3.11-slim
 
 # 设置工作目录
 WORKDIR /app
 
 # 设置环境变量
-ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV PORT=8000
-ENV DEBIAN_FRONTEND=noninteractive
 
-# 复制requirements.txt
+# 复制依赖文件
 COPY requirements.txt .
 
-# 安装Python依赖（使用预编译的包，避免编译）
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir --only-binary=all -r requirements.txt
+# 安装 Python 依赖
+RUN pip install --no-cache-dir -r requirements.txt
 
 # 复制应用代码
 COPY . .

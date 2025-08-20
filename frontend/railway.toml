@@ -1,14 +1,7 @@
 [build]
 builder = "dockerfile"
-dockerfilePath = "frontend/Dockerfile"
-context = "frontend"
 
 [deploy]
 startCommand = "serve -s dist -l $PORT"
 healthcheckPath = "/"
 healthcheckTimeout = 300
-restartPolicyType = "on_failure"
-restartPolicyMaxRetries = 10
-
-[deploy.variables]
-NODE_ENV = "production"
