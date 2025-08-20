@@ -4,9 +4,9 @@ dockerfilePath = "project/backend/Dockerfile"
 watchPaths = ["."]
 
 [deploy]
-startCommand = "uvicorn app.main:app --host 0.0.0.0 --port $PORT"
-healthcheckPath = "/"
-healthcheckTimeout = 300
+startCommand = "uvicorn app.main:app --host 0.0.0.0 --port $PORT --workers 1"
+healthcheckPath = "/health"
+healthcheckTimeout = 600
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 10
 
