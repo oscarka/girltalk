@@ -20,5 +20,4 @@ COPY backend/ .
 # 暴露端口
 EXPOSE $PORT
 
-# 启动命令
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "$PORT"]
+# 注意：启动命令由 Railway 的 startCommand 控制
