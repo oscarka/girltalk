@@ -11,3 +11,4 @@ restartPolicyType = "on_failure"
 [deploy.environment]
 PORT = "3000"
 NODE_ENV = "production"
+VITE_API_BASE_URL = "https://backend-production-e222.up.railway.app"
