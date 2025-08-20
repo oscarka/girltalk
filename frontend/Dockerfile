@@ -25,10 +25,6 @@ FROM node:18-slim as runtime
 # 设置工作目录
 WORKDIR /app
 
-# 创建非root用户
-RUN useradd --create-home --shell /bin/bash app && \
-    chown -R app:app /app
-
 # 设置环境变量
 ENV NODE_ENV=production
 ENV PORT=3000
@@ -38,11 +34,14 @@ ENV RAILWAY_ENVIRONMENT=production
 RUN npm install -g serve --no-optional --no-audit --no-fund
 
 # 复制构建产物
-COPY --from=builder --chown=app:app /app/dist ./dist
+COPY --from=builder /app/dist ./dist
 
-# 创建必要的目录
+# 创建非root用户
+RUN useradd --create-home --shell /bin/bash app
+
+# 创建必要的目录并设置权限
 RUN mkdir -p logs && \
-    chown -R app:app logs
+    chown -R app:app /app
 
 # 暴露端口
 EXPOSE $PORT
