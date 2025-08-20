@@ -6,7 +6,8 @@ WORKDIR /app
 
 # 设置环境变量
 ENV NODE_ENV=production
-# 使用 Railway 提供的 PORT 环境变量
+# 设置 Vite 环境变量，确保构建时能正确读取
+ENV VITE_API_BASE_URL=https://backend-production-e222.up.railway.app
 
 # 安装必要的系统依赖（Alpine 需要这些来编译某些 npm 包）
 RUN apk add --no-cache python3 make g++
