@@ -29,5 +29,5 @@ RUN npm run build
 # 暴露端口（使用 Railway 的 PORT 环境变量）
 EXPOSE $PORT
 
-# 启动命令（绑定到 0.0.0.0 确保外部访问）
-CMD serve dist -l 0.0.0.0:$PORT
+# 启动命令（serve 默认绑定到 0.0.0.0）
+CMD serve dist -l $PORT
