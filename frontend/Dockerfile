@@ -11,8 +11,8 @@ ENV PORT=3000
 # 复制 package 文件（参考后端的路径配置）
 COPY frontend/package.json frontend/package-lock.json ./
 
-# 安装依赖
-RUN npm ci --only=production
+# 安装所有依赖（包括 devDependencies，因为需要 typescript 和 vite 来构建）
+RUN npm ci
 
 # 复制源代码（参考后端的路径配置）
 COPY frontend/ .
