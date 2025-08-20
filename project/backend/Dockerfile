@@ -23,9 +23,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 # 复制应用代码
 COPY . .
 
-# 创建健康检查端点
-RUN echo 'from fastapi import FastAPI\napp = FastAPI()\n@app.get("/health")\ndef health_check():\n    return {"status": "healthy"}' > health_check.py
-
 # 暴露端口
 EXPOSE $PORT
 
