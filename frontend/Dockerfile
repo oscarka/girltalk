@@ -1,32 +1,34 @@
-# 构建阶段
-FROM node:18-alpine AS builder
+# 使用 Node.js 18 Alpine 镜像
+FROM node:18-alpine
 
 # 设置工作目录
 WORKDIR /app
 
-# 复制package文件
-COPY frontend/package*.json ./
+# 设置环境变量
+ENV NODE_ENV=production
+ENV PORT=3000
+
+# 安装系统依赖
+RUN apk add --no-cache dumb-init
+
+# 复制 package 文件
+COPY package*.json ./
 
 # 安装依赖
-RUN npm ci
+RUN npm ci --only=production
 
 # 复制源代码
-COPY frontend/ .
+COPY . .
 
 # 构建应用
 RUN npm run build
 
-# 生产阶段
-FROM nginx:alpine
-
-# 复制构建产物到nginx目录
-COPY --from=builder /app/dist /usr/share/nginx/html
-
-# 复制nginx配置
-COPY frontend/nginx.conf /etc/nginx/nginx.conf
+# 安装 serve 用于生产环境
+RUN npm install -g serve
 
 # 暴露端口
 EXPOSE $PORT
 
-# 启动nginx
-CMD ["nginx", "-g", "daemon off;"]
+# 使用 dumb-init 启动应用
+ENTRYPOINT ["dumb-init", "--"]
+CMD ["serve", "-s", "dist", "-l", "$PORT"]
