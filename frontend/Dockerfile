@@ -27,6 +27,7 @@ COPY frontend/ .
 RUN npm run build
 
 # 暴露端口（使用环境变量）
-EXPOSE $PORT
+EXPOSE 3000
 
-# 注意：启动命令由 Railway 的 startCommand 控制（参考后端）
+# 启动命令（参考后端的成功模式）
+CMD ["serve", "dist", "-l", "3000"]
