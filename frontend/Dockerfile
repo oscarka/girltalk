@@ -17,6 +17,9 @@ COPY frontend/package.json frontend/package-lock.json ./
 # 安装所有依赖（明确指定安装 devDependencies）
 RUN npm ci --include=dev
 
+# 安装 serve 用于生产环境
+RUN npm install -g serve
+
 # 复制源代码（参考后端的路径配置）
 COPY frontend/ .
 
