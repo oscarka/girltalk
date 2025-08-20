@@ -1,5 +1,5 @@
-# 使用Python 3.11官方镜像
-FROM python:3.11-slim
+# 使用更稳定的Python镜像
+FROM python:3.11-alpine
 
 # 设置工作目录
 WORKDIR /app
@@ -9,9 +9,8 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 # 注意：PORT环境变量由Railway自动设置，这里不需要固定值
 
-# 安装系统依赖（只安装必要的）
-RUN apt-get update && apt-get install -y --no-install-recommends gcc
-RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+# 安装系统依赖（Alpine版本更轻量）
+RUN apk add --no-cache gcc musl-dev
 
 # 复制requirements.txt
 COPY requirements.txt .
