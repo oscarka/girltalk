@@ -1,5 +1,7 @@
 [build]
 builder = "dockerfile"
+dockerfilePath = "frontend/Dockerfile"
+context = "."
 
 [deploy]
 startCommand = "serve -s dist -l $PORT"
