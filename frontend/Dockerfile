@@ -1,5 +1,5 @@
-# 使用 Node.js 18 Alpine 镜像
-FROM node:18-alpine
+# 使用更稳定的 Node.js 18 镜像
+FROM node:18-slim
 
 # 设置工作目录
 WORKDIR /app
@@ -7,9 +7,6 @@ WORKDIR /app
 # 设置环境变量
 ENV NODE_ENV=production
 ENV PORT=3000
-
-# 安装系统依赖
-RUN apk add --no-cache dumb-init
 
 # 复制 package 文件（确保包含 package-lock.json）
 COPY package.json package-lock.json* ./
@@ -29,6 +26,5 @@ RUN npm install -g serve
 # 暴露端口
 EXPOSE $PORT
 
-# 使用 dumb-init 启动应用
-ENTRYPOINT ["dumb-init", "--"]
+# 启动应用
 CMD ["serve", "-s", "dist", "-l", "$PORT"]
