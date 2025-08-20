@@ -13,13 +13,13 @@ ENV PYTHONUNBUFFERED=1
 RUN apk add --no-cache gcc musl-dev
 
 # 复制requirements.txt
-COPY project/backend/requirements.txt .
+COPY requirements.txt .
 
 # 安装Python依赖
 RUN pip install --no-cache-dir -r requirements.txt
 
 # 复制应用代码
-COPY project/backend/ .
+COPY . .
 
 # 暴露端口
 EXPOSE $PORT
