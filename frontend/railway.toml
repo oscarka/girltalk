@@ -4,7 +4,7 @@ dockerfilePath = "frontend/Dockerfile"
 context = "."
 
 [deploy]
-startCommand = "serve -s dist -l $PORT"
+startCommand = "serve dist -l 3000"
 healthcheckPath = "/"
 healthcheckTimeout = 300
 restartPolicyType = "on_failure"
