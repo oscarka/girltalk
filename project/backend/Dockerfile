@@ -25,4 +25,5 @@ COPY project/backend/ .
 EXPOSE $PORT
 
 # 启动命令
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "$PORT"]
+ENTRYPOINT ["uvicorn"]
+CMD ["app.main:app", "--host", "0.0.0.0", "--port", "$PORT"]
