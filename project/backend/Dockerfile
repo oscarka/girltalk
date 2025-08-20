@@ -9,10 +9,9 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 # 注意：PORT环境变量由Railway自动设置，这里不需要固定值
 
-# 安装系统依赖
-RUN apt-get update && apt-get install -y \
-    gcc \
-    && rm -rf /var/lib/apt/lists/*
+# 安装系统依赖（只安装必要的）
+RUN apt-get update && apt-get install -y --no-install-recommends gcc
+RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # 复制requirements.txt
 COPY requirements.txt .
