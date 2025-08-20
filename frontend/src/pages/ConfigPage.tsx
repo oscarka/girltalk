@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { 
-  Button, 
-  Card, 
-  Tabs, 
+import {
+  Button,
+  Card,
+  Tabs,
   Space,
   Toast,
   Loading,
   List
 } from 'antd-mobile'
-import { 
-  LeftOutline, 
+import {
+  LeftOutline,
   EditSOutline,
   UploadOutline,
   DownlandOutline
@@ -99,7 +99,7 @@ const ConfigPage: React.FC = () => {
   const downloadConfig = (type: 'rules' | 'weight') => {
     let content = ''
     let filename = ''
-    
+
     if (type === 'rules') {
       content = riskRules
       filename = 'risk_rules.json'
@@ -210,7 +210,7 @@ const ConfigPage: React.FC = () => {
       content: (
         <Card className="config-card">
           <h5 className="config-title">知识库管理</h5>
-          
+
           <div className="upload-section">
             <span className="section-title">上传知识库文件</span>
             <div className="upload-area">
@@ -227,7 +227,7 @@ const ConfigPage: React.FC = () => {
                 color="primary"
                 fill="outline"
                 className="upload-btn"
-                onClick={() => document.querySelector('.file-input')?.click()}
+                onClick={() => (document.querySelector('.file-input') as HTMLInputElement)?.click()}
               >
                 <UploadOutline />
                 选择CSV文件
@@ -248,8 +248,8 @@ const ConfigPage: React.FC = () => {
                       <div className="knowledge-name">{key}</div>
                       <div className="knowledge-details">
                         <span className="detail-text">
-                          文件：{value.filename} | 
-                          行数：{value.rows} | 
+                          文件：{value.filename} |
+                          行数：{value.rows} |
                           列数：{value.columns.length}
                         </span>
                       </div>

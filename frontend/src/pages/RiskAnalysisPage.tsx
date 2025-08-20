@@ -251,11 +251,7 @@ const RiskAnalysisPage: React.FC = () => {
     }
   }
 
-  const getRiskColor = (score: number) => {
-    if (score >= 75) return '#ff4d4f'
-    if (score >= 40) return '#faad14'
-    return '#52c41a'
-  }
+
 
   const getRiskLevel = (score: number) => {
     if (score >= 75) return '高风险'
