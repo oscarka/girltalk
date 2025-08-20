@@ -11,11 +11,11 @@ ENV PORT=3000
 # 安装系统依赖
 RUN apk add --no-cache dumb-init
 
-# 复制 package 文件
-COPY package*.json ./
+# 复制 package 文件（确保包含 package-lock.json）
+COPY package.json package-lock.json* ./
 
-# 安装依赖
-RUN npm ci --only=production
+# 安装依赖（使用 npm install 而不是 npm ci，更兼容）
+RUN npm install --only=production
 
 # 复制源代码
 COPY . .
