@@ -7,7 +7,7 @@ WORKDIR /app
 # 设置环境变量
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
-ENV PORT=8000
+# 注意：PORT环境变量由Railway自动设置，这里不需要固定值
 
 # 安装系统依赖
 RUN apt-get update && apt-get install -y \

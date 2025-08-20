@@ -7,7 +7,7 @@
 ### 目录结构
 ```
 oscarka/girltalk (GitHub仓库)
-└── girltalk/                    ← 项目根目录
+└── project/                     ← 项目根目录（重命名后）
     ├── backend/                 ← Python后端代码
     │   ├── app/                 ← FastAPI应用
     │   ├── config/              ← 配置文件
@@ -39,7 +39,7 @@ oscarka/girltalk (GitHub仓库)
 - 项目名称: `girltalk-backend`
 - 选择 "Deploy from GitHub repo"
 - 选择仓库: `oscarka/girltalk`
-- **子目录设置**: `girltalk/backend` ⭐ **关键设置**
+- **子目录设置**: `project/backend` ⭐ **关键设置**
 
 ### 2. 环境变量配置
 在Railway项目设置中添加以下环境变量：
@@ -71,7 +71,7 @@ ENVIRONMENT=production
 - 项目名称: `girltalk-frontend`
 - 选择 "Deploy from GitHub repo"
 - 选择仓库: `oscarka/girltalk`
-- **子目录设置**: `girltalk/frontend` ⭐ **关键设置**
+- **子目录设置**: `project/frontend` ⭐ **关键设置**
 
 ### 2. 环境变量配置
 在Railway项目设置中添加以下环境变量：
@@ -116,14 +116,14 @@ export const api = axios.create({
 ### 第一步：部署后端
 1. 在Railway上创建 `girltalk-backend` 项目
 2. 连接GitHub仓库: `oscarka/girltalk`
-3. **设置子目录**: `girltalk/backend` ⭐ **关键设置**
+3. **设置子目录**: `project/backend` ⭐ **关键设置**
 4. 配置环境变量
 5. 部署并获取域名
 
 ### 第二步：部署前端
 1. 在Railway上创建 `girltalk-frontend` 项目
 2. 连接GitHub仓库: `oscarka/girltalk`
-3. **设置子目录**: `girltalk/frontend` ⭐ **关键设置**
+3. **设置子目录**: `project/frontend` ⭐ **关键设置**
 4. 配置环境变量（包含后端域名）
 5. 部署并获取域名
 
@@ -142,7 +142,7 @@ export const api = axios.create({
 6. **域名更新**: 如果域名变化，需要更新前端的环境变量
 
 ### ⚠️ 重要提醒
-- **不要从根目录 `girltalk` 部署**，这会导致Nixpacks构建失败
+- **不要从根目录 `project` 部署**，这会导致Nixpacks构建失败
 - **必须分别创建两个Railway项目**，每个项目指向不同的子目录
 - **子目录设置是部署成功的关键**，请严格按照说明操作
 
