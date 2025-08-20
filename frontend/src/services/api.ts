@@ -20,7 +20,7 @@ declare global {
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
 const api = axios.create({
-  baseURL: `${API_BASE_URL}/api/v1`,
+  baseURL: API_BASE_URL.endsWith('/api/v1') ? API_BASE_URL : `${API_BASE_URL}/api/v1`,
   timeout: 60000, // 增加到60秒，给后端更多处理时间
   headers: {
     'Content-Type': 'application/json',
