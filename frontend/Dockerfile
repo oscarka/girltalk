@@ -14,8 +14,8 @@ RUN apk add --no-cache python3 make g++
 # 复制 package 文件（参考后端的路径配置）
 COPY frontend/package.json frontend/package-lock.json ./
 
-# 安装所有依赖（包括 devDependencies，因为需要 typescript 和 vite 来构建）
-RUN npm ci
+# 安装所有依赖（明确指定安装 devDependencies）
+RUN npm ci --include=dev
 
 # 复制源代码（参考后端的路径配置）
 COPY frontend/ .
