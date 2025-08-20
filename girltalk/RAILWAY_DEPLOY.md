@@ -4,6 +4,22 @@
 
 本项目包含前端和后端两个部分，可以分别部署到Railway上。
 
+### 目录结构
+```
+oscarka/girltalk (GitHub仓库)
+└── girltalk/                    ← 项目根目录
+    ├── backend/                 ← Python后端代码
+    │   ├── app/                 ← FastAPI应用
+    │   ├── config/              ← 配置文件
+    │   ├── requirements.txt     ← Python依赖
+    │   └── railway.json         ← 后端Railway配置
+    ├── frontend/                ← React前端代码
+    │   ├── src/                 ← 源代码
+    │   ├── package.json         ← Node.js依赖
+    │   └── railway.json         ← 前端Railway配置
+    └── README.md                ← 项目说明
+```
+
 ## 部署架构
 
 ```
@@ -23,7 +39,7 @@
 - 项目名称: `girltalk-backend`
 - 选择 "Deploy from GitHub repo"
 - 选择仓库: `oscarka/girltalk`
-- 选择目录: `girltalk/backend`
+- **子目录设置**: `girltalk/backend` ⭐ **关键设置**
 
 ### 2. 环境变量配置
 在Railway项目设置中添加以下环境变量：
@@ -55,7 +71,7 @@ ENVIRONMENT=production
 - 项目名称: `girltalk-frontend`
 - 选择 "Deploy from GitHub repo"
 - 选择仓库: `oscarka/girltalk`
-- 选择目录: `girltalk/frontend`
+- **子目录设置**: `girltalk/frontend` ⭐ **关键设置**
 
 ### 2. 环境变量配置
 在Railway项目设置中添加以下环境变量：
@@ -99,15 +115,17 @@ export const api = axios.create({
 
 ### 第一步：部署后端
 1. 在Railway上创建 `girltalk-backend` 项目
-2. 连接GitHub仓库，选择 `girltalk/backend` 目录
-3. 配置环境变量
-4. 部署并获取域名
+2. 连接GitHub仓库: `oscarka/girltalk`
+3. **设置子目录**: `girltalk/backend` ⭐ **关键设置**
+4. 配置环境变量
+5. 部署并获取域名
 
 ### 第二步：部署前端
 1. 在Railway上创建 `girltalk-frontend` 项目
-2. 连接GitHub仓库，选择 `girltalk/frontend` 目录
-3. 配置环境变量（包含后端域名）
-4. 部署并获取域名
+2. 连接GitHub仓库: `oscarka/girltalk`
+3. **设置子目录**: `girltalk/frontend` ⭐ **关键设置**
+4. 配置环境变量（包含后端域名）
+5. 部署并获取域名
 
 ### 第三步：测试
 1. 访问前端域名
@@ -118,9 +136,15 @@ export const api = axios.create({
 
 1. **环境变量**: 确保所有敏感信息都通过环境变量配置
 2. **端口配置**: **不要手动设置PORT环境变量**，Railway会自动分配并设置$PORT
-3. **CORS设置**: 后端已配置允许所有来源，生产环境可限制为前端域名
-4. **健康检查**: 两个服务都有健康检查端点，Railway会自动监控
-5. **域名更新**: 如果域名变化，需要更新前端的环境变量
+3. **子目录设置**: ⭐ **必须正确设置子目录**，这是部署成功的关键
+4. **CORS设置**: 后端已配置允许所有来源，生产环境可限制为前端域名
+5. **健康检查**: 两个服务都有健康检查端点，Railway会自动监控
+6. **域名更新**: 如果域名变化，需要更新前端的环境变量
+
+### ⚠️ 重要提醒
+- **不要从根目录 `girltalk` 部署**，这会导致Nixpacks构建失败
+- **必须分别创建两个Railway项目**，每个项目指向不同的子目录
+- **子目录设置是部署成功的关键**，请严格按照说明操作
 
 ## 端口配置说明
 
