@@ -1,13 +1,22 @@
+# 核心框架
 fastapi>=0.104.0
 uvicorn[standard]>=0.24.0
+
+# 数据处理
 python-multipart>=0.0.6
 python-dotenv>=1.0.0
 pydantic>=2.5.0
 pydantic-settings>=2.1.0
+
+# HTTP 客户端
 httpx>=0.25.0
-pandas>=2.0.0
+
+# 数据格式支持
 pyyaml>=6.0.0
-python-jose[cryptography]>=3.3.0
-passlib[bcrypt]>=1.7.0
-sqlalchemy>=2.0.0
-aiosqlite>=0.19.0
+
+# 可选依赖（如果需要数据库功能可以取消注释）
+# pandas>=2.0.0
+# python-jose[cryptography]>=3.3.0
+# passlib[bcrypt]>=1.7.0
+# sqlalchemy>=2.0.0
+# aiosqlite>=0.19.0

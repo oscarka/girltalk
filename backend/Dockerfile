@@ -1,5 +1,5 @@
-# 使用更稳定的Python镜像
-FROM python:3.11-alpine
+# 使用更轻量的Python镜像
+FROM python:3.11-slim
 
 # 设置工作目录
 WORKDIR /app
@@ -8,15 +8,20 @@ WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV PORT=8000
+ENV DEBIAN_FRONTEND=noninteractive
 
-# 安装系统依赖（Alpine版本更轻量）
-RUN apk add --no-cache gcc musl-dev
+# 安装系统依赖（使用 apt 而不是 apk，更稳定）
+RUN apt-get update && apt-get install -y \
+    gcc \
+    g++ \
+    && rm -rf /var/lib/apt/lists/*
 
 # 复制requirements.txt
 COPY requirements.txt .
 
-# 安装Python依赖
-RUN pip install --no-cache-dir -r requirements.txt
+# 安装Python依赖（分批安装，减少内存使用）
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
 # 复制应用代码
 COPY . .
