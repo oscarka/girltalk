@@ -23,9 +23,6 @@ COPY frontend/ .
 # 构建应用
 RUN npm run build
 
-# 安装 serve
-RUN npm install -g serve
-
 # 暴露端口
 EXPOSE $PORT
 
