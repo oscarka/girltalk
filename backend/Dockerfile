@@ -10,18 +10,12 @@ ENV PYTHONUNBUFFERED=1
 ENV PORT=8000
 ENV DEBIAN_FRONTEND=noninteractive
 
-# 安装系统依赖（使用 apt 而不是 apk，更稳定）
-RUN apt-get update && apt-get install -y \
-    gcc \
-    g++ \
-    && rm -rf /var/lib/apt/lists/*
-
 # 复制requirements.txt
 COPY requirements.txt .
 
-# 安装Python依赖（分批安装，减少内存使用）
+# 安装Python依赖（使用预编译的包，避免编译）
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+    pip install --no-cache-dir --only-binary=all -r requirements.txt
 
 # 复制应用代码
 COPY . .
