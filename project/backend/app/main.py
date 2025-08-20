@@ -53,7 +53,11 @@ async def root():
 
 @app.get("/health")
 async def health_check():
-    return {"status": "healthy"}
+    return {"status": "healthy", "message": "Backend service is running"}
+
+@app.get("/api/health")
+async def api_health_check():
+    return {"status": "healthy", "message": "API service is running"}
 
 if __name__ == "__main__":
     uvicorn.run(
