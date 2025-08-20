@@ -9,13 +9,13 @@ ENV PYTHONUNBUFFERED=1
 ENV PORT=8000
 
 # 复制依赖文件
-COPY requirements.txt .
+COPY backend/requirements.txt .
 
 # 安装 Python 依赖
 RUN pip install --no-cache-dir -r requirements.txt
 
 # 复制应用代码
-COPY . .
+COPY backend/ .
 
 # 暴露端口
 EXPOSE $PORT
