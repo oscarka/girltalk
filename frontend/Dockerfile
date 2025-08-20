@@ -26,5 +26,4 @@ RUN npm install -g serve
 # 暴露端口
 EXPOSE $PORT
 
-# 启动应用
-CMD ["serve", "-s", "dist", "-l", "$PORT"]
+# 注意：启动命令由 Railway 的 startCommand 控制
