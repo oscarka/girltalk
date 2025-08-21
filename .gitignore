@@ -134,3 +134,10 @@ frontend/.env.production
 backend/__pycache__/
 backend/.env
 backend/.env.test
+
+# Test and debug files
+step*.json
+test_*.json
+*_result.json
+*_analysis.json
+*_prompt.json

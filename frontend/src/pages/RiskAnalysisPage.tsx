@@ -346,8 +346,13 @@ const RiskAnalysisPage: React.FC = () => {
           fontSize: '12px',
           zIndex: 9999
         }}>
-          stepLoading: {stepLoading.toString()}<br />
-          step: {step}
+          当前步骤: {
+            step === 'input' ? '输入待分析文本' :
+              step === 'tactics' ? '生成验证话术' :
+                step === 'response' ? '等待用户回答' :
+                  step === 'result' ? '分析完成' : '未知'
+          }<br />
+          {stepLoading && '🔄 正在处理...'}
         </div>
       </div>
 

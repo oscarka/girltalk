@@ -989,8 +989,10 @@ class RiskEngine:
         # 2. 决策分析
         print(f"🎯 步骤2: 开始决策分析")
         
-        # 添加调试信息
+        # 添加详细的调试信息
         print(f"🔍 调试: static_result的keys: {list(static_result.keys())}")
+        print(f"🔍 调试: static_result的完整内容: {static_result}")
+        
         if "static_scan" in static_result:
             print(f"🔍 调试: static_scan的keys: {list(static_result['static_scan'].keys())}")
             if "score" in static_result["static_scan"]:
@@ -1009,8 +1011,12 @@ class RiskEngine:
             else:
                 # 如果都没有，尝试从rules计算分数
                 rules = static_result.get("rules", [])
+                print(f"🔍 调试: rules内容: {rules}")
                 static_score = sum(rule.get("risk_value", 0) for rule in rules)
                 print(f"📊 从rules计算分数: {static_score}")
+            
+            print(f"🔍 调试: 最终使用的static_score: {static_score}")
+            print(f"🔍 调试: dynamic_result: {dynamic_result}")
             
             decision_result = self.make_decision(
                 static_score,
@@ -1072,10 +1078,27 @@ class RiskEngine:
         
         # 5. 构建最终结果
         print(f"📦 步骤5: 构建最终结果")
+        
+        # 修复数据结构问题
+        if isinstance(static_result, dict):
+            # 检查是否已经包含static_scan字段
+            if "static_scan" in static_result:
+                # 如果已经有static_scan字段，直接使用
+                final_static_scan = static_result
+            else:
+                # 如果没有static_scan字段，创建一个
+                final_static_scan = {"static_scan": static_result}
+            
+            # 确保有score字段
+            if "score" not in final_static_scan:
+                final_static_scan["score"] = static_score
+        else:
+            final_static_scan = {"static_scan": static_result, "score": static_score}
+        
         final_result = {
             "version": "1.0",
             "input_text": static_result.get("input_text", ""),
-            "static_scan": static_result,
+            "static_scan": final_static_scan,
             "verification_tactics": verification_tactics,
             "dynamic_session": dynamic_result,
             "decision": decision_result,
