@@ -173,8 +173,14 @@ class DeepSeekService:
                     result = response.json()
                     content = result["choices"][0]["message"]["content"].strip()
                     
-                    # 尝试解析JSON
+                    # 尝试解析JSON，处理可能被代码块包裹的情况
                     try:
+                        # 如果内容被```json```包裹，先提取出来
+                        if content.startswith("```json") and content.endswith("```"):
+                            content = content[7:-3].strip()  # 移除```json和```
+                        elif content.startswith("```") and content.endswith("```"):
+                            content = content[3:-3].strip()  # 移除```和```
+                        
                         analysis = json.loads(content)
                         return analysis
                     except json.JSONDecodeError:
