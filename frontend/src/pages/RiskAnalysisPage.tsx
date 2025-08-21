@@ -138,6 +138,24 @@ const RiskAnalysisPage: React.FC = () => {
     console.log('🚀 开始生成验证话术')
     console.log('📋 当前风险结果:', riskResult)
 
+    // 检查是否已有话术
+    if (riskResult.verification_tactics && riskResult.verification_tactics.length > 0) {
+      console.log('✅ 检测到已有话术，直接使用，避免重复调用API')
+      console.log('📝 话术数量:', riskResult.verification_tactics.length)
+      
+      // 显示Toast，然后延迟跳转
+      Toast.show('话术已生成，无需重复调用')
+      
+      setTimeout(() => {
+        console.log('✅ 步骤切换完成，跳转到用户回答')
+        setStep('response')
+      }, 1000)
+      return
+    }
+
+    // 如果没有话术，需要调用API生成
+    console.log('⚠️ 未检测到话术，需要调用API生成')
+    
     // 立即显示加载动画
     console.log('🔄 立即显示步骤切换加载动画')
     flushSync(() => {
