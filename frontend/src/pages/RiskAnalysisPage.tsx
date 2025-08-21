@@ -138,14 +138,14 @@ const RiskAnalysisPage: React.FC = () => {
     console.log('🚀 开始生成验证话术')
     console.log('📋 当前风险结果:', riskResult)
 
-        // 检查是否已有话术（注意：static-scan返回的是AI提示，不是最终话术）
+    // 检查是否已有话术（注意：static-scan返回的是AI提示，不是最终话术）
     if (riskResult.verification_tactics && riskResult.verification_tactics.length > 0) {
       console.log('✅ 检测到已有话术，直接使用，避免重复调用API')
       console.log('📝 话术数量:', riskResult.verification_tactics.length)
-      
+
       // 显示Toast，然后延迟跳转
       Toast.show('话术已生成，无需重复调用')
-      
+
       setTimeout(() => {
         console.log('✅ 步骤切换完成，跳转到用户回答')
         setStep('response')
@@ -182,7 +182,10 @@ const RiskAnalysisPage: React.FC = () => {
 
       console.log('⏰ API调用开始时间:', new Date(startTime).toISOString())
 
-      const response = await riskAnalysisAPI.generateTactics(inputText)
+      const response = await riskAnalysisAPI.generateTactics(
+        riskResult.rules,
+        riskResult.ai_analysis
+      )
 
       const endTime = Date.now()
       const duration = endTime - startTime

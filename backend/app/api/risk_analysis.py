@@ -16,6 +16,10 @@ class StaticScanRequest(BaseModel):
 class DynamicAnalysisRequest(BaseModel):
     response_text: str
 
+class GenerateTacticsRequest(BaseModel):
+    rules: List[Dict]
+    ai_analysis: Dict
+
 # 响应模型
 class RiskAnalysisResponse(BaseModel):
     success: bool
@@ -63,23 +67,22 @@ async def dynamic_risk_analysis(
 
 @router.post("/generate-tactics", response_model=RiskAnalysisResponse)
 async def generate_verification_tactics(
-    request: RiskAnalysisRequest,
+    request: GenerateTacticsRequest,
     risk_engine: RiskEngine = Depends(get_risk_engine)
 ):
-    """基于AI提示生成验证话术"""
+    """基于已有的AI提示生成验证话术"""
     try:
-        # 这里需要传入规则和AI分析结果
-        # 暂时使用full_risk_analysis，但只返回话术部分
-        result = await risk_engine.full_risk_analysis(
-            request.input_text,
-            request.user_response
+        # 直接基于传入的规则和AI分析结果生成话术
+        verification_tactics = await risk_engine.generate_verification_tactics(
+            request.rules, 
+            request.ai_analysis
         )
         
-        # 只返回话术相关的结果
+        # 返回话术相关的结果
         tactics_result = {
-            "verification_tactics": result.get("verification_tactics", []),
-            "rules": result.get("static_scan", {}).get("rules", []),
-            "ai_analysis": result.get("static_scan", {}).get("ai_analysis", {})
+            "verification_tactics": verification_tactics,
+            "rules": request.rules,
+            "ai_analysis": request.ai_analysis
         }
         
         return RiskAnalysisResponse(
