@@ -114,29 +114,34 @@ class RiskEngine:
             ai_risk_score = ai_analysis.get("risk_score", 0)
             ai_rules = ai_analysis.get("ai_rules", [])
             risk_score += ai_risk_score
-            triggered_rules.extend(ai_rules)
             print(f"✅ AI分析完成: 风险分+{ai_risk_score}, 新增{len(ai_rules)}条AI规则")
             print(f"📋 AI分析结果: {ai_analysis}")
         else:
             print("❌ AI分析失败或返回空结果")
+            ai_rules = []
         
-        # 3. 风险模式识别
-        print("🔍 步骤3: 风险模式识别")
+        # 3. 规则合并 - 合并关键词匹配和AI分析的规则
+        print("🔗 步骤3: 规则合并")
+        merged_rules = self._merge_rules(triggered_rules, ai_rules)
+        print(f"✅ 规则合并完成: 从{len(triggered_rules) + len(ai_rules)}条合并为{len(merged_rules)}条")
+        
+        # 4. 风险模式识别
+        print("🔍 步骤4: 风险模式识别")
         pattern_rules = await self._detect_risk_patterns(text)
         pattern_risk_score = pattern_rules.get("risk_score", 0)
         pattern_rules_list = pattern_rules.get("pattern_rules", [])
         risk_score += pattern_risk_score
-        triggered_rules.extend(pattern_rules_list)
+        merged_rules.extend(pattern_rules_list)
         print(f"✅ 模式识别完成: 风险分+{pattern_risk_score}, 新增{len(pattern_rules_list)}条模式规则")
         
         final_score = min(risk_score, 100)
         print(f"🎯 扫描完成: 总风险分 {risk_score} -> 最终分 {final_score}")
-        print(f"📊 总计触发 {len(triggered_rules)} 条规则")
+        print(f"📊 总计触发 {len(merged_rules)} 条规则")
         
         result = {
             "score": final_score,
-            "rules": triggered_rules,
-            "total_rules": len(triggered_rules),
+            "rules": merged_rules,
+            "total_rules": len(merged_rules),
             "ai_analysis": ai_analysis,
             "pattern_analysis": pattern_rules
         }
@@ -260,6 +265,47 @@ class RiskEngine:
                 "verification_suggestions": ["请手动验证信息"]
             }
     
+    def _merge_rules(self, keyword_rules: List[Dict], ai_rules: List[Dict]) -> List[Dict]:
+        """合并关键词匹配和AI分析的规则"""
+        print(f"🔗 开始合并规则: 关键词规则{len(keyword_rules)}条, AI规则{len(ai_rules)}条")
+        
+        merged_rules = {}
+        
+        # 处理关键词匹配规则
+        for rule in keyword_rules:
+            rule_name = rule['rule_name']
+            merged_rules[rule_name] = {
+                'rule_name': rule_name,
+                'risk_value': rule['risk_value'],
+                'keywords': rule['keywords'],
+                'detection_method': 'keyword_match',
+                'description': '',
+                'matched_rule': rule_name,
+                'verification_suggestions': []
+            }
+            print(f"📋 添加关键词规则: {rule_name}")
+        
+        # 合并AI分析规则
+        for rule in ai_rules:
+            rule_name = rule['rule_name']
+            if rule_name in merged_rules:
+                # 合并现有规则
+                print(f"🔗 合并规则: {rule_name}")
+                merged_rules[rule_name].update({
+                    'detection_method': 'hybrid',
+                    'description': rule.get('description', ''),
+                    'matched_rule': rule.get('matched_rule', rule_name),
+                    'verification_suggestions': rule.get('verification_suggestions', [])
+                })
+            else:
+                # 新增AI规则
+                print(f"📋 新增AI规则: {rule_name}")
+                merged_rules[rule_name] = rule
+        
+        result = list(merged_rules.values())
+        print(f"✅ 规则合并完成: 最终{len(result)}条规则")
+        return result
+    
     async def _detect_risk_patterns(self, text: str) -> Dict:
         """风险模式识别"""
         patterns = []
@@ -339,22 +385,34 @@ class RiskEngine:
         # 2. 批量生成所有规则的话术
         print(f"🚀 开始批量生成所有规则话术")
         
-        # 构建统一的批量prompt - 只保留必要字段
+        # 构建统一的批量prompt - 基于合并后的规则
         all_rules_info = []
         for rule in triggered_rules:
             rule_info = {
                 "rule_name": rule.get("rule_name", ""),
-                "keywords": rule.get("keywords", [])
+                "keywords": rule.get("keywords", []),
+                "description": rule.get("description", ""),
+                "detection_method": rule.get("detection_method", "")
             }
             all_rules_info.append(rule_info)
         
         print(f"📊 准备批量处理{len(all_rules_info)}条规则")
         
-        # 构建简化的批量prompt
+        # 构建更详细的批量prompt
         prompt = f"""
 为以下风险规则生成验证问题，要求自然委婉：
 规则：{json.dumps(all_rules_info, ensure_ascii=False, indent=2)}
+
+要求：
+1. 每个问题要自然，不能太直接
+2. 要能验证对方是否真的了解这个领域
+3. 语言要委婉，避免直接质疑
+4. 针对具体的风险点进行验证
+5. 必须为每个规则生成话术，返回的tactics数组长度必须等于输入规则数量
+
 返回JSON：{{"tactics": [{{"rule_name": "规则名", "tactic": "验证问题", "priority": "high"}}]}}
+
+重要提醒：必须为每个规则生成话术，返回的tactics数组长度必须等于输入规则数量！
 """
         
         print(f"📤 开始调用DeepSeek API，批量处理{len(all_rules_info)}条规则")
@@ -384,7 +442,9 @@ class RiskEngine:
         
         # 验证话术
         ai_tactics = parsed_result.get("tactics", [])
-        if not self._validate_tactics(ai_tactics, len(triggered_rules)):
+        # 基于合并后的规则数量进行验证，而不是原始规则数量
+        expected_tactic_count = len(triggered_rules)
+        if not self._validate_tactics(ai_tactics, expected_tactic_count):
             print(f"❌ 话术验证失败，使用默认话术")
             default_tactics = self._generate_default_tactics(triggered_rules)
             tactics.extend(default_tactics)
