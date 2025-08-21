@@ -987,20 +987,38 @@ class RiskEngine:
         # 2. 决策分析
         print(f"🎯 步骤2: 开始决策分析")
         try:
+            # 处理不同的数据结构
+            if "static_scan" in static_result:
+                # 如果传入的是包含static_scan的对象
+                static_score = static_result["static_scan"]["score"]
+            else:
+                # 如果传入的是直接的static_result
+                static_score = static_result["score"]
+            
             decision_result = self.make_decision(
-                static_result["score"],
+                static_score,
                 dynamic_result["overall_risk_score"]
             )
             print(f"✅ 决策分析完成: {decision_result}")
         except Exception as e:
             print(f"❌ 决策分析失败: {e}")
+            import traceback
+            print(f"📋 异常堆栈: {traceback.format_exc()}")
             decision_result = {"decision": "ERROR", "risk_level": "分析失败", "total_score": 0}
         
         # 3. 构建证据链
         print(f"🔗 步骤3: 构建证据链")
         evidence_chain = []
         try:
-            for rule in static_result.get("rules", []):
+            # 处理不同的数据结构
+            if "static_scan" in static_result:
+                # 如果传入的是包含static_scan的对象
+                rules = static_result["static_scan"]["rules"]
+            else:
+                # 如果传入的是直接的static_result
+                rules = static_result.get("rules", [])
+            
+            for rule in rules:
                 keywords = rule.get('keywords', [])
                 if keywords:
                     evidence_chain.append(f"静态：{rule['rule_name']}（{', '.join(keywords)}）")
@@ -1015,6 +1033,8 @@ class RiskEngine:
             print(f"✅ 证据链构建完成: {evidence_chain}")
         except Exception as e:
             print(f"❌ 证据链构建失败: {e}")
+            import traceback
+            print(f"📋 异常堆栈: {traceback.format_exc()}")
             evidence_chain = ["证据链构建失败"]
         
         # 4. 生成时间戳
