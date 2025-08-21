@@ -422,6 +422,9 @@ class RiskEngine:
                         print(f"⚠️ 规则'{rule.get('rule_name', '')}'使用默认话术")
                 
                 print(f"✅ 成功生成{len(tactics)}条话术，基于AI分析结果")
+                total_time = time.time() - start_time
+                print(f"⏱️ 话术生成总耗时: {total_time:.2f}秒")
+                print(f"🎉 话术生成完成，总共{len(tactics)}条")
                 return tactics
             else:
                 print(f"⚠️ AI建议数量不足({len(suggestions)})，需要补充生成")
