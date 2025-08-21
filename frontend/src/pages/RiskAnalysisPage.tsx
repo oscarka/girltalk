@@ -138,7 +138,7 @@ const RiskAnalysisPage: React.FC = () => {
     console.log('🚀 开始生成验证话术')
     console.log('📋 当前风险结果:', riskResult)
 
-    // 检查是否已有话术
+        // 检查是否已有话术（注意：static-scan返回的是AI提示，不是最终话术）
     if (riskResult.verification_tactics && riskResult.verification_tactics.length > 0) {
       console.log('✅ 检测到已有话术，直接使用，避免重复调用API')
       console.log('📝 话术数量:', riskResult.verification_tactics.length)
@@ -153,9 +153,19 @@ const RiskAnalysisPage: React.FC = () => {
       return
     }
 
+    // 检查是否有AI分析结果和提示
+    if (riskResult.ai_analysis && riskResult.ai_analysis.verification_suggestions) {
+      console.log('📝 检测到AI分析提示，需要基于提示生成话术')
+      console.log('📝 AI提示数量:', riskResult.ai_analysis.verification_suggestions.length)
+    } else {
+      console.log('⚠️ 未检测到AI分析提示，无法生成话术')
+      Toast.show('缺少AI分析结果，无法生成话术')
+      return
+    }
+
     // 如果没有话术，需要调用API生成
     console.log('⚠️ 未检测到话术，需要调用API生成')
-    
+
     // 立即显示加载动画
     console.log('🔄 立即显示步骤切换加载动画')
     flushSync(() => {
@@ -167,12 +177,12 @@ const RiskAnalysisPage: React.FC = () => {
     const startTime = Date.now()
 
     try {
-      console.log('📤 准备调用 fullAnalysis API')
+      console.log('📤 准备调用 generateTactics API')
       console.log('📝 输入文本:', inputText)
 
       console.log('⏰ API调用开始时间:', new Date(startTime).toISOString())
 
-      const response = await riskAnalysisAPI.fullAnalysis(inputText)
+      const response = await riskAnalysisAPI.generateTactics(inputText)
 
       const endTime = Date.now()
       const duration = endTime - startTime

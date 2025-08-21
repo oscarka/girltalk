@@ -61,6 +61,35 @@ async def dynamic_risk_analysis(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"动态分析失败: {str(e)}")
 
+@router.post("/generate-tactics", response_model=RiskAnalysisResponse)
+async def generate_verification_tactics(
+    request: RiskAnalysisRequest,
+    risk_engine: RiskEngine = Depends(get_risk_engine)
+):
+    """基于AI提示生成验证话术"""
+    try:
+        # 这里需要传入规则和AI分析结果
+        # 暂时使用full_risk_analysis，但只返回话术部分
+        result = await risk_engine.full_risk_analysis(
+            request.input_text,
+            request.user_response
+        )
+        
+        # 只返回话术相关的结果
+        tactics_result = {
+            "verification_tactics": result.get("verification_tactics", []),
+            "rules": result.get("static_scan", {}).get("rules", []),
+            "ai_analysis": result.get("static_scan", {}).get("ai_analysis", {})
+        }
+        
+        return RiskAnalysisResponse(
+            success=True,
+            data=tactics_result,
+            message="话术生成完成"
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"话术生成失败: {str(e)}")
+
 @router.post("/full-analysis", response_model=RiskAnalysisResponse)
 async def full_risk_analysis(
     request: RiskAnalysisRequest,

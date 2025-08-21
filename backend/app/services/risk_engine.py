@@ -134,11 +134,6 @@ class RiskEngine:
         merged_rules.extend(pattern_rules_list)
         print(f"✅ 模式识别完成: 风险分+{pattern_risk_score}, 新增{len(pattern_rules_list)}条模式规则")
         
-        # 5. 生成验证话术
-        print("🤖 步骤5: 生成验证话术")
-        verification_tactics = await self.generate_verification_tactics(merged_rules, ai_analysis)
-        print(f"✅ 话术生成完成: {verification_tactics}")
-        
         final_score = min(risk_score, 100)
         print(f"🎯 扫描完成: 总风险分 {risk_score} -> 最终分 {final_score}")
         print(f"📊 总计触发 {len(merged_rules)} 条规则")
@@ -147,7 +142,6 @@ class RiskEngine:
             "score": final_score,
             "rules": merged_rules,
             "total_rules": len(merged_rules),
-            "verification_tactics": verification_tactics,
             "ai_analysis": ai_analysis,
             "pattern_analysis": pattern_rules
         }

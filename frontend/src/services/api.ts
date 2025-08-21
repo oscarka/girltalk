@@ -71,6 +71,13 @@ export const riskAnalysisAPI = {
     })
   },
 
+  // 生成验证话术
+  generateTactics: async (inputText: string): Promise<APIResponse<any>> => {
+    return api.post('/generate-tactics', {
+      input_text: inputText
+    })
+  },
+
   // 健康检查
   healthCheck: async (): Promise<APIResponse<any>> => {
     return api.get('/health')
