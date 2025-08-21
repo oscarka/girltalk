@@ -80,6 +80,15 @@ export const riskAnalysisAPI = {
     })
   },
 
+  // 综合风控分析（复用前两步结果）
+  comprehensiveAnalysis: async (staticResult: any, verificationTactics: any[], userResponse: string): Promise<APIResponse<any>> => {
+    return api.post('/comprehensive-analysis', {
+      static_result: staticResult,
+      verification_tactics: verificationTactics,
+      user_response: userResponse
+    })
+  },
+
   // 健康检查
   healthCheck: async (): Promise<APIResponse<any>> => {
     return api.get('/health')

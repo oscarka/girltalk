@@ -21,6 +21,11 @@ class GenerateTacticsRequest(BaseModel):
     rules: list
     ai_analysis: dict
 
+class ComprehensiveAnalysisRequest(BaseModel):
+    static_result: dict
+    verification_tactics: list
+    user_response: str
+
 # 响应模型
 class RiskAnalysisResponse(BaseModel):
     success: bool
@@ -97,6 +102,28 @@ async def generate_verification_tactics(
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"话术生成失败: {str(e)}")
+
+@router.post("/comprehensive-analysis", response_model=RiskAnalysisResponse)
+async def comprehensive_risk_analysis(
+    request: ComprehensiveAnalysisRequest,
+    risk_engine: RiskEngine = Depends(get_risk_engine)
+):
+    """综合风控分析 - 复用前两步结果，只做动态分析和决策"""
+    try:
+        # 复用前两步的结果，只做动态分析和决策
+        result = await risk_engine.comprehensive_risk_analysis(
+            request.static_result,
+            request.verification_tactics,
+            request.user_response
+        )
+        
+        return RiskAnalysisResponse(
+            success=True,
+            data=result,
+            message="综合风控分析完成"
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"综合分析失败: {str(e)}")
 
 @router.post("/full-analysis", response_model=RiskAnalysisResponse)
 async def full_risk_analysis(

@@ -247,6 +247,12 @@ const RiskAnalysisPage: React.FC = () => {
       return
     }
 
+    // 检查是否有前两步的结果
+    if (!riskResult || !riskResult.verification_tactics) {
+      Toast.show('缺少前两步分析结果，请重新开始')
+      return
+    }
+
     // 立即显示加载动画
     console.log('🔄 立即显示步骤切换加载动画')
     flushSync(() => {
@@ -256,7 +262,17 @@ const RiskAnalysisPage: React.FC = () => {
 
     setLoading(true)
     try {
-      const response = await riskAnalysisAPI.fullAnalysis(inputText, userResponse)
+      console.log('🚀 调用综合风控分析API，复用前两步结果')
+      console.log('📋 静态扫描结果:', riskResult)
+      console.log('📋 话术结果:', riskResult.verification_tactics)
+      console.log('💬 用户回答:', userResponse)
+
+      const response = await riskAnalysisAPI.comprehensiveAnalysis(
+        riskResult,  // 包含static_scan, rules, ai_analysis等
+        riskResult.verification_tactics,
+        userResponse
+      )
+
       if ((response as any).success) {
         setRiskResult((response as any).data)
         // 显示Toast，然后延迟跳转

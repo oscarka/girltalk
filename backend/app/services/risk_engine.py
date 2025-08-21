@@ -386,53 +386,69 @@ class RiskEngine:
         }
     
     async def generate_verification_tactics(self, triggered_rules: List[Dict], ai_analysis: Dict = None) -> List[Dict]:
-        """生成验证话术 - 直接使用AI分析结果，避免重复调用"""
+        """生成验证话术 - 调用话术优化服务"""
         print(f"🤖 开始生成验证话术")
         print(f"📋 触发规则数量: {len(triggered_rules)}")
         
         start_time = time.time()
-        tactics = []
         
         # 检查是否有风险规则
         if not triggered_rules:
             print("❌ 没有识别到风险规则，无法生成话术")
             return []
         
-        # 1. 优先检查AI分析中是否已有验证建议
-        if ai_analysis and ai_analysis.get("verification_suggestions"):
-            suggestions = ai_analysis["verification_suggestions"]
-            print(f"📝 检测到AI分析中有{len(suggestions)}条验证建议，直接使用避免重复调用")
+        # 调用话术优化服务
+        print(f"🚀 调用话术优化服务，基于AI分析结果生成自然委婉的验证问题")
+        optimized_tactics = await self._optimize_verification_tactics(triggered_rules, ai_analysis)
+        
+        total_time = time.time() - start_time
+        print(f"⏱️ 话术生成总耗时: {total_time:.2f}秒")
+        print(f"🎉 话术生成完成，总共{len(optimized_tactics)}条")
+        
+        return optimized_tactics
+
+    async def _optimize_verification_tactics(self, triggered_rules: List[Dict], ai_analysis: Dict) -> List[Dict]:
+        """话术优化服务 - 基于AI分析结果生成自然委婉的验证问题"""
+        print(f"🔧 开始话术优化，基于{len(triggered_rules)}条规则和AI分析结果")
+        
+        try:
+            # 构建话术优化prompt
+            prompt = self._build_tactics_optimization_prompt(triggered_rules, ai_analysis)
             
-            # 确保建议数量足够
-            if len(suggestions) >= len(triggered_rules):
-                print(f"✅ AI建议数量足够({len(suggestions)}>={len(triggered_rules)})，直接分配")
-                
-                # 逐一分配建议到规则
-                for i, rule in enumerate(triggered_rules):
-                    tactics.append({
-                        "rule_name": rule.get("rule_name", ""),
-                        "tactic": suggestions[i],
-                        "knowledge": rule.get("description", "基于AI分析生成"),
-                        "priority": "high"
-                    })
-                    print(f"✅ 规则'{rule.get('rule_name', '')}'分配建议: {suggestions[i][:30]}...")
-                
-                # 直接返回，避免后续API调用
-                total_time = time.time() - start_time
-                print(f"⏱️ 话术生成总耗时: {total_time:.2f}秒")
-                print(f"🎉 成功生成{len(tactics)}条话术，基于现有AI分析，避免重复调用")
-                print(f"🔚 方法结束，返回{len(tactics)}条话术")
-                return tactics
-            else:
-                print(f"⚠️ AI建议数量不足: {len(suggestions)} < {len(triggered_rules)}，需要补充")
-        else:
-            print("⚠️ AI分析中无验证建议，需要调用API生成")
+            print(f"📤 调用DeepSeek API进行话术优化")
+            result = await self.deepseek_service.generate_verification_tactic(
+                "话术优化服务", {"prompt": prompt}
+            )
+            print(f"✅ 话术优化成功: {result}")
+            
+            # 解析优化后的话术
+            parsed_result = self._parse_ai_result(result)
+            if not parsed_result:
+                print(f"❌ 话术优化结果解析失败，使用默认话术")
+                return self._generate_default_tactics(triggered_rules)
+            
+            # 验证话术
+            ai_tactics = parsed_result.get("tactics", [])
+            expected_tactic_count = len(triggered_rules)
+            if not self._validate_tactics(ai_tactics, expected_tactic_count):
+                print(f"❌ 优化后话术验证失败，使用默认话术")
+                return self._generate_default_tactics(triggered_rules)
+            
+            # 转换为标准格式
+            standard_tactics = self._convert_tactics_to_standard(ai_tactics, triggered_rules)
+            return standard_tactics
+            
+        except Exception as e:
+            print(f"❌ 话术优化服务调用失败: {e}")
+            print(f"📋 异常堆栈: {traceback.format_exc()}")
+            # 降级到默认话术
+            return self._generate_default_tactics(triggered_rules)
+
+    def _build_tactics_optimization_prompt(self, triggered_rules: List[Dict], ai_analysis: Dict) -> str:
+        """构建话术优化提示词"""
         
-        # 2. 如果AI建议不够或没有，才调用API生成（避免重复调用）
-        print(f"🚀 需要补充生成话术，调用API")
-        
-        # 构建统一的批量prompt - 基于合并后的规则
-        all_rules_info = []
+        # 构建规则信息
+        rules_info = []
         for rule in triggered_rules:
             rule_info = {
                 "rule_name": rule.get("rule_name", ""),
@@ -440,81 +456,49 @@ class RiskEngine:
                 "description": rule.get("description", ""),
                 "detection_method": rule.get("detection_method", "")
             }
-            all_rules_info.append(rule_info)
+            rules_info.append(rule_info)
         
-        print(f"📊 准备批量处理{len(all_rules_info)}条规则")
+        # 获取AI分析中的验证建议
+        ai_suggestions = ai_analysis.get("verification_suggestions", []) if ai_analysis else []
         
-        # 构建更详细的批量prompt
         prompt = f"""
-为以下风险规则生成验证问题，要求自然委婉：
-规则：{json.dumps(all_rules_info, ensure_ascii=False, indent=2)}
+你是一个专业的婚恋风控话术优化专家。请基于以下信息，生成自然、委婉的验证问题：
 
-要求：
-1. 每个问题要自然，不能太直接
-2. 要能验证对方是否真的了解这个领域
-3. 语言要委婉，避免直接质疑
-4. 针对具体的风险点进行验证
-5. 必须为每个规则生成话术，返回的tactics数组长度必须等于输入规则数量
+## 风险规则信息：
+{json.dumps(rules_info, ensure_ascii=False, indent=2)}
 
-返回JSON：{{"tactics": [{{"rule_name": "规则名", "tactic": "验证问题", "priority": "high"}}]}}
+## AI分析的验证建议：
+{json.dumps(ai_suggestions, ensure_ascii=False, indent=2)}
 
-重要提醒：必须为每个规则生成话术，返回的tactics数组长度必须等于输入规则数量！
+## 优化要求：
+1. **自然委婉**：问题要像朋友聊天一样自然，不能太直接或生硬
+2. **避免质疑**：不要用"请提供"、"需要验证"等命令式语言
+3. **引导分享**：用"能否分享一下"、"方便了解一下"等引导性表达
+4. **具体明确**：针对具体的风险点，但表达要委婉
+5. **数量匹配**：必须为每个规则生成1条话术
+
+## 话术示例：
+- 原建议："请提供具体任职银行名称和职位证明"
+- 优化后："能否分享一下您在哪家银行工作？VP职位听起来很厉害，方便了解一下具体的工作内容吗？"
+
+- 原建议："需要提供收入证明文件验证200万年薪真实性"
+- 优化后："200万的年薪真的很不错！方便了解一下您的收入构成吗？比如基本工资、奖金、分红等？"
+
+## 返回格式：
+{{
+    "tactics": [
+        {{
+            "rule_name": "规则名称",
+            "tactic": "优化后的自然委婉验证问题",
+            "priority": "high"
+        }}
+    ]
+}}
+
+重要提醒：必须为每个规则生成1条话术，返回的tactics数组长度必须等于输入规则数量！
 """
         
-        print(f"📤 开始调用DeepSeek API，批量处理{len(all_rules_info)}条规则")
-        
-        # 调用AI API
-        try:
-            result = await self.deepseek_service.generate_verification_tactic(
-                "批量话术生成", {"prompt": prompt}
-            )
-            print(f"✅ 批量AI话术生成成功: {result}")
-        except Exception as e:
-            print(f"❌ AI API调用失败: {e}")
-            print(f"📋 异常堆栈: {traceback.format_exc()}")
-            # 快速失败，使用默认话术
-            default_tactics = self._generate_default_tactics(triggered_rules)
-            tactics.extend(default_tactics)
-            print(f"✅ 使用默认话术，共{len(default_tactics)}条")
-            return tactics
-        
-        # 解析AI结果
-        parsed_result = self._parse_ai_result(result)
-        if not parsed_result:
-            print(f"❌ AI结果解析失败，使用默认话术")
-            default_tactics = self._generate_default_tactics(triggered_rules)
-            tactics.extend(default_tactics)
-            return tactics
-        
-        # 验证话术
-        ai_tactics = parsed_result.get("tactics", [])
-        # 基于合并后的规则数量进行验证，而不是原始规则数量
-        expected_tactic_count = len(triggered_rules)
-        if not self._validate_tactics(ai_tactics, expected_tactic_count):
-            print(f"❌ 话术验证失败，使用默认话术")
-            default_tactics = self._generate_default_tactics(triggered_rules)
-            tactics.extend(default_tactics)
-            return tactics
-        
-        # 转换话术格式
-        standard_tactics = self._convert_tactics_to_standard(ai_tactics, triggered_rules)
-        tactics.extend(standard_tactics)
-        
-        # 3. 如果没有检测到规则，生成通用验证话术
-        if not tactics:
-            print(f"⚠️ 没有生成任何话术，使用通用话术")
-            tactics.append({
-                "rule_name": "通用验证",
-                "tactic": "请详细描述一下您的工作内容和日常安排，这样我们可以更好地了解彼此。",
-                "knowledge": "通用验证话术",
-                "priority": "medium"
-            })
-        
-        total_time = time.time() - start_time
-        print(f"⏱️ 话术生成总耗时: {total_time:.2f}秒")
-        print(f"🎉 话术生成完成，总共{len(tactics)}条")
-        
-        return tactics
+        return prompt
     
     def _parse_ai_result(self, result: str) -> Optional[Dict]:
         """解析AI结果，失败立即返回None"""
@@ -978,3 +962,85 @@ class RiskEngine:
                 "priority": "medium"
             })
         return tactics
+
+    async def comprehensive_risk_analysis(
+        self,
+        static_result: Dict,
+        verification_tactics: List[Dict],
+        user_response: str
+    ) -> Dict:
+        """综合风控分析 - 复用前两步结果，只做动态分析和决策"""
+        print(f"🚀 开始综合风控分析（复用前两步结果）")
+        print(f"📝 复用静态扫描结果: {len(static_result.get('rules', []))}条规则")
+        print(f"📝 复用话术结果: {len(verification_tactics)}条话术")
+        print(f"💬 用户回答: {user_response[:50]}...")
+        
+        # 1. 动态分析用户回答
+        print(f"💬 步骤1: 开始动态分析用户回答")
+        try:
+            dynamic_result = await self.analyze_response(user_response)
+            print(f"✅ 动态分析完成: {dynamic_result}")
+        except Exception as e:
+            print(f"❌ 动态分析失败: {e}")
+            dynamic_result = {"overall_risk_score": 0, "risk_tags": ["动态分析失败"]}
+        
+        # 2. 决策分析
+        print(f"🎯 步骤2: 开始决策分析")
+        try:
+            decision_result = self.make_decision(
+                static_result["score"],
+                dynamic_result["overall_risk_score"]
+            )
+            print(f"✅ 决策分析完成: {decision_result}")
+        except Exception as e:
+            print(f"❌ 决策分析失败: {e}")
+            decision_result = {"decision": "ERROR", "risk_level": "分析失败", "total_score": 0}
+        
+        # 3. 构建证据链
+        print(f"🔗 步骤3: 构建证据链")
+        evidence_chain = []
+        try:
+            for rule in static_result.get("rules", []):
+                keywords = rule.get('keywords', [])
+                if keywords:
+                    evidence_chain.append(f"静态：{rule['rule_name']}（{', '.join(keywords)}）")
+                else:
+                    evidence_chain.append(f"静态：{rule['rule_name']}")
+            
+            if dynamic_result and dynamic_result.get("risk_tags"):
+                for tag in dynamic_result["risk_tags"]:
+                    if tag:
+                        evidence_chain.append(f"动态：{tag}")
+            
+            print(f"✅ 证据链构建完成: {evidence_chain}")
+        except Exception as e:
+            print(f"❌ 证据链构建失败: {e}")
+            evidence_chain = ["证据链构建失败"]
+        
+        # 4. 生成时间戳
+        print(f"⏰ 步骤4: 生成时间戳")
+        try:
+            if PANDAS_AVAILABLE:
+                timestamp = pd.Timestamp.now().isoformat()
+            else:
+                timestamp = datetime.now().isoformat()
+            print(f"✅ 时间戳生成: {timestamp}")
+        except Exception as e:
+            print(f"❌ 时间戳生成失败: {e}")
+            timestamp = "时间戳生成失败"
+        
+        # 5. 构建最终结果
+        print(f"📦 步骤5: 构建最终结果")
+        final_result = {
+            "version": "1.0",
+            "input_text": static_result.get("input_text", ""),
+            "static_scan": static_result,
+            "verification_tactics": verification_tactics,
+            "dynamic_session": dynamic_result,
+            "decision": decision_result,
+            "evidence_chain": evidence_chain,
+            "timestamp": timestamp
+        }
+        
+        print(f"🎉 综合风控分析完成（复用前两步结果）")
+        return final_result
