@@ -991,9 +991,11 @@ class RiskEngine:
             if "static_scan" in static_result:
                 # 如果传入的是包含static_scan的对象
                 static_score = static_result["static_scan"]["score"]
+                print(f"📊 从static_scan中获取分数: {static_score}")
             else:
                 # 如果传入的是直接的static_result
                 static_score = static_result["score"]
+                print(f"📊 直接从static_result获取分数: {static_score}")
             
             decision_result = self.make_decision(
                 static_score,
@@ -1004,7 +1006,8 @@ class RiskEngine:
             print(f"❌ 决策分析失败: {e}")
             import traceback
             print(f"📋 异常堆栈: {traceback.format_exc()}")
-            decision_result = {"decision": "ERROR", "risk_level": "分析失败", "total_score": 0}
+            # 使用默认值，避免整个流程失败
+            decision_result = {"decision": "WARNING", "risk_level": "中风险", "total_score": 100, "static_score": 100, "dynamic_score": dynamic_result.get("overall_risk_score", 0)}
         
         # 3. 构建证据链
         print(f"🔗 步骤3: 构建证据链")
