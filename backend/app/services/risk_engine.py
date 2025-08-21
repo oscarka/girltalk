@@ -1002,10 +1002,15 @@ class RiskEngine:
                 # 如果传入的是包含static_scan的对象
                 static_score = static_result["static_scan"]["score"]
                 print(f"📊 从static_scan中获取分数: {static_score}")
-            else:
+            elif "score" in static_result:
                 # 如果传入的是直接的static_result
                 static_score = static_result["score"]
                 print(f"📊 直接从static_result获取分数: {static_score}")
+            else:
+                # 如果都没有，尝试从rules计算分数
+                rules = static_result.get("rules", [])
+                static_score = sum(rule.get("risk_value", 0) for rule in rules)
+                print(f"📊 从rules计算分数: {static_score}")
             
             decision_result = self.make_decision(
                 static_score,
@@ -1027,9 +1032,12 @@ class RiskEngine:
             if "static_scan" in static_result:
                 # 如果传入的是包含static_scan的对象
                 rules = static_result["static_scan"]["rules"]
-            else:
+            elif "rules" in static_result:
                 # 如果传入的是直接的static_result
                 rules = static_result.get("rules", [])
+            else:
+                # 如果都没有，使用空列表
+                rules = []
             
             for rule in rules:
                 keywords = rule.get('keywords', [])
