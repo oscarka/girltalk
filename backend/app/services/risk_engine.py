@@ -797,9 +797,9 @@ class RiskEngine:
             "关键条款": "重要条款"
         }
     
-    async def analyze_response(self, response_text: str) -> Dict:
+    async def analyze_response(self, response_text: str, verification_tactics: List[Dict] = None) -> Dict:
         """分析用户回答"""
-        return await self.deepseek_service.analyze_response_risk(response_text)
+        return await self.deepseek_service.analyze_response_risk(response_text, verification_tactics)
     
     def make_decision(self, static_score: int, dynamic_score: int) -> Dict:
         """决策引擎"""
@@ -871,7 +871,8 @@ class RiskEngine:
         if user_response:
             print(f"💬 步骤3: 开始动态分析用户回答")
             try:
-                dynamic_result = await self.analyze_response(user_response)
+                # 传入验证话术，让AI知道用户在回答什么
+                dynamic_result = await self.analyze_response(user_response, tactics)
                 print(f"✅ 动态分析完成: {dynamic_result}")
             except Exception as e:
                 print(f"❌ 动态分析失败: {e}")
@@ -978,7 +979,8 @@ class RiskEngine:
         # 1. 动态分析用户回答
         print(f"💬 步骤1: 开始动态分析用户回答")
         try:
-            dynamic_result = await self.analyze_response(user_response)
+            # 传入验证话术，让AI知道用户在回答什么
+            dynamic_result = await self.analyze_response(user_response, verification_tactics)
             print(f"✅ 动态分析完成: {dynamic_result}")
         except Exception as e:
             print(f"❌ 动态分析失败: {e}")
@@ -986,6 +988,14 @@ class RiskEngine:
         
         # 2. 决策分析
         print(f"🎯 步骤2: 开始决策分析")
+        
+        # 添加调试信息
+        print(f"🔍 调试: static_result的keys: {list(static_result.keys())}")
+        if "static_scan" in static_result:
+            print(f"🔍 调试: static_scan的keys: {list(static_result['static_scan'].keys())}")
+            if "score" in static_result["static_scan"]:
+                print(f"🔍 调试: static_scan.score = {static_result['static_scan']['score']}")
+        
         try:
             # 处理不同的数据结构
             if "static_scan" in static_result:

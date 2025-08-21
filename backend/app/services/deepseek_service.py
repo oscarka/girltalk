@@ -93,14 +93,27 @@ class DeepSeekService:
             print(f"📋 异常堆栈: {traceback.format_exc()}")
             return self._fallback_tactic(rule_name, knowledge_item)
     
-    async def analyze_response_risk(self, response_text: str) -> Dict[str, any]:
+    async def analyze_response_risk(self, response_text: str, verification_tactics: List[Dict] = None) -> Dict[str, any]:
         """分析用户回答的风险特征"""
+        
+        # 构建验证问题信息
+        tactics_info = ""
+        if verification_tactics:
+            tactics_info = "\n## 验证问题及目的：\n"
+            for i, tactic in enumerate(verification_tactics, 1):
+                rule_name = tactic.get('rule_name', '未知规则')
+                tactic_text = tactic.get('tactic', '')
+                tactics_info += f"{i}. 问题：\"{tactic_text}\"\n"
+                tactics_info += f"   目的：验证{rule_name}相关信息的真实性\n\n"
+        
         prompt = f"""
-        你是一个专业的风险分析专家，请分析以下用户回答的风险特征。
+        你是一个专业的风险分析专家，需要分析用户对验证问题的回答。
 
-        用户回答：{response_text}
+        {tactics_info}
+        ## 用户回答：
+        {response_text}
 
-        请从以下5个维度进行评分（0-100分）：
+        请基于用户对上述验证问题的回答，从以下5个维度进行评分（0-100分）：
 
         1. fuzzy_evasion（模糊回避程度）：
            - 0分：回答具体、明确、信息充分
@@ -148,46 +161,62 @@ class DeepSeekService:
         """
         
         try:
+            print(f"🌐 准备调用DeepSeek API进行动态分析")
+            print(f"🔑 API密钥: {self.api_key[:10]}...")
+            print(f"📤 用户回答: {response_text}")
+            
             async with httpx.AsyncClient() as client:
+                request_data = {
+                    "model": self.model,
+                    "messages": [
+                        {
+                            "role": "user",
+                            "content": prompt
+                        }
+                    ],
+                    "max_tokens": self.max_tokens,
+                    "temperature": 0.3
+                }
+                
+                print(f"📤 发送动态分析请求")
+                
                 response = await client.post(
                     f"{self.api_base}/v1/chat/completions",
                     headers={
                         "Authorization": f"Bearer {self.api_key}",
                         "Content-Type": "application/json"
                     },
-                    json={
-                        "model": self.model,
-                        "messages": [
-                            {
-                                "role": "user",
-                                "content": prompt
-                            }
-                        ],
-                        "max_tokens": self.max_tokens,
-                        "temperature": 0.3
-                    },
+                    json=request_data,
                     timeout=30.0
                 )
                 
+                print(f"📥 收到响应，状态码: {response.status_code}")
+                
                 if response.status_code == 200:
                     result = response.json()
+                    print(f"✅ 动态分析API调用成功")
                     content = result["choices"][0]["message"]["content"].strip()
+                    print(f"📝 AI返回的原始内容: {content}")
                     
                     # 尝试解析JSON，处理可能被代码块包裹的情况
                     try:
                         # 如果内容被```json```包裹，先提取出来
                         if content.startswith("```json") and content.endswith("```"):
                             content = content[7:-3].strip()  # 移除```json和```
+                            print(f"🧹 移除JSON代码块标记后: {content}")
                         elif content.startswith("```") and content.endswith("```"):
                             content = content[3:-3].strip()  # 移除```和```
+                            print(f"🧹 移除代码块标记后: {content}")
                         
                         analysis = json.loads(content)
+                        print(f"✅ 动态分析JSON解析成功: {analysis}")
                         return analysis
                     except json.JSONDecodeError:
-                        print(f"JSON解析失败: {content}")
+                        print(f"❌ 动态分析JSON解析失败: {content}")
                         return self._fallback_analysis(response_text)
                 else:
-                    print(f"DeepSeek API调用失败: {response.status_code}")
+                    print(f"❌ 动态分析API调用失败: {response.status_code}")
+                    print(f"📋 错误响应: {response.text}")
                     return self._fallback_analysis(response_text)
                     
         except Exception as e:
