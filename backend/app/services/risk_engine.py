@@ -266,12 +266,12 @@ class RiskEngine:
             }
     
     def _merge_rules(self, keyword_rules: List[Dict], ai_rules: List[Dict]) -> List[Dict]:
-        """合并关键词匹配和AI分析的规则"""
+        """合并关键词匹配和AI分析的规则 - 智能合并策略"""
         print(f"🔗 开始合并规则: 关键词规则{len(keyword_rules)}条, AI规则{len(ai_rules)}条")
         
         merged_rules = {}
         
-        # 处理关键词匹配规则
+        # 第一步：处理关键词匹配规则，作为基础规则
         for rule in keyword_rules:
             rule_name = rule['rule_name']
             merged_rules[rule_name] = {
@@ -285,22 +285,46 @@ class RiskEngine:
             }
             print(f"📋 添加关键词规则: {rule_name}")
         
-        # 合并AI分析规则
+        # 第二步：智能处理AI分析规则
         for rule in ai_rules:
             rule_name = rule['rule_name']
-            if rule_name in merged_rules:
-                # 合并现有规则
-                print(f"🔗 合并规则: {rule_name}")
-                merged_rules[rule_name].update({
+            matched_rule = rule.get('matched_rule', '')
+            
+            # 检查是否应该合并到现有规则
+            should_merge = False
+            merge_target = None
+            
+            # 策略1：按matched_rule字段匹配（优先级最高）
+            if matched_rule and matched_rule in merged_rules:
+                should_merge = True
+                merge_target = matched_rule
+                print(f"🔗 按matched_rule合并: {rule_name} -> {matched_rule}")
+            
+            # 策略2：按rule_name字段匹配
+            elif rule_name in merged_rules:
+                should_merge = True
+                merge_target = rule_name
+                print(f"🔗 按rule_name合并: {rule_name}")
+            
+            # 策略3：无法匹配，保留为新规则
+            else:
+                should_merge = False
+                print(f"📋 保留AI新规则: {rule_name}")
+            
+            # 执行合并或添加
+            if should_merge and merge_target:
+                # 合并到现有规则
+                merged_rules[merge_target].update({
                     'detection_method': 'hybrid',
                     'description': rule.get('description', ''),
                     'matched_rule': rule.get('matched_rule', rule_name),
                     'verification_suggestions': rule.get('verification_suggestions', [])
                 })
+                print(f"✅ 成功合并规则: {rule_name} -> {merge_target}")
             else:
-                # 新增AI规则
-                print(f"📋 新增AI规则: {rule_name}")
+                # 保留为新规则
                 merged_rules[rule_name] = rule
+                print(f"✅ 保留AI新规则: {rule_name}")
         
         result = list(merged_rules.values())
         print(f"✅ 规则合并完成: 最终{len(result)}条规则")
@@ -362,28 +386,50 @@ class RiskEngine:
         }
     
     async def generate_verification_tactics(self, triggered_rules: List[Dict], ai_analysis: Dict = None) -> List[Dict]:
-        """生成验证话术（扁平化错误处理版本）"""
+        """生成验证话术 - 直接使用AI分析结果，避免重复调用"""
         print(f"🤖 开始生成验证话术")
         print(f"📋 触发规则数量: {len(triggered_rules)}")
         
         start_time = time.time()
         tactics = []
         
-        # 1. 基于AI分析生成话术
+        # 检查是否有风险规则
+        if not triggered_rules:
+            print("❌ 没有识别到风险规则，无法生成话术")
+            return []
+        
+        # 1. 直接使用AI分析结果，避免重复调用API
         if ai_analysis and ai_analysis.get("verification_suggestions"):
             suggestions = ai_analysis["verification_suggestions"]
-            print(f"📝 找到{len(suggestions)}条AI建议")
-            for suggestion in suggestions:
-                tactics.append({
-                    "rule_name": "AI智能建议",
-                    "tactic": suggestion,
-                    "knowledge": "AI分析生成",
-                    "priority": "high"
-                })
-            print(f"✅ 添加了{len(suggestions)}条AI建议话术")
+            print(f"📝 找到{len(suggestions)}条AI建议，直接使用，避免重复调用API")
+            
+            # 将AI建议分配到对应的规则上
+            if len(suggestions) >= len(triggered_rules):
+                # AI建议数量足够，直接分配
+                for i, rule in enumerate(triggered_rules):
+                    if i < len(suggestions):
+                        tactics.append({
+                            "rule_name": rule.get("rule_name", ""),
+                            "tactic": suggestions[i],
+                            "knowledge": rule.get("description", "AI分析生成"),
+                            "priority": "high"
+                        })
+                        print(f"✅ 为规则'{rule.get('rule_name', '')}'分配AI建议: {suggestions[i][:30]}...")
+                    else:
+                        # 如果AI建议不够，使用默认话术
+                        default_tactic = self._generate_default_tactic_for_rule(rule)
+                        tactics.append(default_tactic)
+                        print(f"⚠️ 规则'{rule.get('rule_name', '')}'使用默认话术")
+                
+                print(f"✅ 成功生成{len(tactics)}条话术，基于AI分析结果")
+                return tactics
+            else:
+                print(f"⚠️ AI建议数量不足({len(suggestions)})，需要补充生成")
+        else:
+            print("⚠️ AI分析中没有验证建议，需要生成话术")
         
-        # 2. 批量生成所有规则的话术
-        print(f"🚀 开始批量生成所有规则话术")
+        # 2. 如果AI建议不够或没有，才调用API生成（避免重复调用）
+        print(f"🚀 需要补充生成话术，调用API")
         
         # 构建统一的批量prompt - 基于合并后的规则
         all_rules_info = []
