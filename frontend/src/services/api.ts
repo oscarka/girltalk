@@ -72,8 +72,9 @@ export const riskAnalysisAPI = {
   },
 
   // 生成验证话术
-  generateTactics: async (rules: any[], aiAnalysis: any): Promise<APIResponse<any>> => {
+  generateTactics: async (inputText: string, rules: any[], aiAnalysis: any): Promise<APIResponse<any>> => {
     return api.post('/generate-tactics', {
+      input_text: inputText,
       rules: rules,
       ai_analysis: aiAnalysis
     })

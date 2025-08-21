@@ -183,6 +183,7 @@ const RiskAnalysisPage: React.FC = () => {
       console.log('⏰ API调用开始时间:', new Date(startTime).toISOString())
 
       const response = await riskAnalysisAPI.generateTactics(
+        inputText,
         riskResult.rules,
         riskResult.ai_analysis
       )

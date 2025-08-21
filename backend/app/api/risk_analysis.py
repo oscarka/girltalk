@@ -17,8 +17,9 @@ class DynamicAnalysisRequest(BaseModel):
     response_text: str
 
 class GenerateTacticsRequest(BaseModel):
-    rules: List[Dict]
-    ai_analysis: Dict
+    input_text: str
+    rules: list
+    ai_analysis: dict
 
 # 响应模型
 class RiskAnalysisResponse(BaseModel):
@@ -70,19 +71,23 @@ async def generate_verification_tactics(
     request: GenerateTacticsRequest,
     risk_engine: RiskEngine = Depends(get_risk_engine)
 ):
-    """基于已有的AI提示生成验证话术"""
+    """基于AI提示生成验证话术"""
     try:
-        # 直接基于传入的规则和AI分析结果生成话术
+        # 直接使用前端传入的规则和AI分析结果，不重复调用
+        rules = request.rules if hasattr(request, 'rules') else []
+        ai_analysis = request.ai_analysis if hasattr(request, 'ai_analysis') else {}
+        
+        # 基于已有的AI分析结果生成话术
         verification_tactics = await risk_engine.generate_verification_tactics(
-            request.rules, 
-            request.ai_analysis
+            rules, 
+            ai_analysis
         )
         
-        # 返回话术相关的结果
+        # 返回话术结果
         tactics_result = {
             "verification_tactics": verification_tactics,
-            "rules": request.rules,
-            "ai_analysis": request.ai_analysis
+            "rules": rules,
+            "ai_analysis": ai_analysis
         }
         
         return RiskAnalysisResponse(
