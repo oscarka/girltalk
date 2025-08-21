@@ -398,38 +398,35 @@ class RiskEngine:
             print("❌ 没有识别到风险规则，无法生成话术")
             return []
         
-        # 1. 直接使用AI分析结果，避免重复调用API
+        # 1. 优先检查AI分析中是否已有验证建议
         if ai_analysis and ai_analysis.get("verification_suggestions"):
             suggestions = ai_analysis["verification_suggestions"]
-            print(f"📝 找到{len(suggestions)}条AI建议，直接使用，避免重复调用API")
+            print(f"📝 检测到AI分析中有{len(suggestions)}条验证建议，直接使用避免重复调用")
             
-            # 将AI建议分配到对应的规则上
+            # 确保建议数量足够
             if len(suggestions) >= len(triggered_rules):
-                # AI建议数量足够，直接分配
-                for i, rule in enumerate(triggered_rules):
-                    if i < len(suggestions):
-                        tactics.append({
-                            "rule_name": rule.get("rule_name", ""),
-                            "tactic": suggestions[i],
-                            "knowledge": rule.get("description", "AI分析生成"),
-                            "priority": "high"
-                        })
-                        print(f"✅ 为规则'{rule.get('rule_name', '')}'分配AI建议: {suggestions[i][:30]}...")
-                    else:
-                        # 如果AI建议不够，使用默认话术
-                        default_tactic = self._generate_default_tactic_for_rule(rule)
-                        tactics.append(default_tactic)
-                        print(f"⚠️ 规则'{rule.get('rule_name', '')}'使用默认话术")
+                print(f"✅ AI建议数量足够({len(suggestions)}>={len(triggered_rules)})，直接分配")
                 
-                print(f"✅ 成功生成{len(tactics)}条话术，基于AI分析结果")
+                # 逐一分配建议到规则
+                for i, rule in enumerate(triggered_rules):
+                    tactics.append({
+                        "rule_name": rule.get("rule_name", ""),
+                        "tactic": suggestions[i],
+                        "knowledge": rule.get("description", "基于AI分析生成"),
+                        "priority": "high"
+                    })
+                    print(f"✅ 规则'{rule.get('rule_name', '')}'分配建议: {suggestions[i][:30]}...")
+                
+                # 直接返回，避免后续API调用
                 total_time = time.time() - start_time
                 print(f"⏱️ 话术生成总耗时: {total_time:.2f}秒")
-                print(f"🎉 话术生成完成，总共{len(tactics)}条")
+                print(f"🎉 成功生成{len(tactics)}条话术，基于现有AI分析，避免重复调用")
+                print(f"🔚 方法结束，返回{len(tactics)}条话术")
                 return tactics
             else:
-                print(f"⚠️ AI建议数量不足({len(suggestions)})，需要补充生成")
+                print(f"⚠️ AI建议数量不足: {len(suggestions)} < {len(triggered_rules)}，需要补充")
         else:
-            print("⚠️ AI分析中没有验证建议，需要生成话术")
+            print("⚠️ AI分析中无验证建议，需要调用API生成")
         
         # 2. 如果AI建议不够或没有，才调用API生成（避免重复调用）
         print(f"🚀 需要补充生成话术，调用API")
